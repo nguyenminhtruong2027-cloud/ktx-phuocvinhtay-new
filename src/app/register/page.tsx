@@ -580,7 +580,7 @@ export default function RegisterPage() {
               <QrCode size={28} className="text-primary opacity-60" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Đăng Ký Cư Trú</h1>
-            <p className="text-sm text-muted-foreground">Ký Túc Xá Hóc Môn — Đang tải biểu mẫu an toàn...</p>
+            <p className="text-sm text-muted-foreground">Ký Túc Xá Phước Vĩnh Tây — Đang tải biểu mẫu an toàn...</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg border border-border p-6 space-y-4 animate-pulse" suppressHydrationWarning>
             <div className="h-5 w-40 bg-muted/60 rounded" />
@@ -611,7 +611,7 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-xl font-bold text-foreground">Đăng ký thành công!</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Hồ sơ của bạn đã được gửi đến Ban quản lý KTX Hóc Môn. Vui lòng chờ xét duyệt trong vòng <strong>1–2 ngày làm việc</strong>.
+            Hồ sơ của bạn đã được gửi đến Ban quản lý KTX Phước Vĩnh Tây. Vui lòng chờ xét duyệt trong vòng <strong>1–2 ngày làm việc</strong>.
           </p>
           <div className="bg-muted/50 rounded-xl p-4 text-left space-y-1.5 text-sm" suppressHydrationWarning>
             <div className="flex gap-2"><span className="text-muted-foreground w-28">Họ tên:</span><span className="font-medium">{form.ho_va_ten}</span></div>
@@ -643,7 +643,7 @@ export default function RegisterPage() {
               <QrCode size={28} className="text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Đăng Ký Cư Trú</h1>
-            <p className="text-sm text-muted-foreground">Ký Túc Xá Hóc Môn — Điền đầy đủ thông tin để được xét duyệt</p>
+            <p className="text-sm text-muted-foreground">Ký Túc Xá Phước Vĩnh Tây — Điền đầy đủ thông tin để được xét duyệt</p>
           </div>
 
           <form

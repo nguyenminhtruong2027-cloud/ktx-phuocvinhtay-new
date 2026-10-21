@@ -1,8 +1,8 @@
 import React, { Suspense } from 'react';
 
 export const metadata = {
-  title: 'Đăng Ký Cư Trú — KTX Hóc Môn',
-  description: 'Trang đăng ký cư trú công khai cho công nhân KTX Hóc Môn',
+  title: 'Đăng Ký Cư Trú — KTX Phước Vĩnh Tây',
+  description: 'Trang đăng ký cư trú công khai cho công nhân KTX Phước Vĩnh Tây',
 };
 
 export default function RegisterLayout({ children }: { children: React.ReactNode }) {
