@@ -9,7 +9,7 @@ import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/
 export function normalizeSupabaseUrl(rawUrl?: string): string {
   let url = (rawUrl || '').trim().replace(/^["']|["']$/g, '');
   if (!url) {
-    url = 'https://ekkveifmfrhbkfozujgm.supabase.co';
+    url = 'https://dyxcrglybrawussscoxw.supabase.co';
   }
   // Strip trailing slashes
   url = url.replace(/\/+$/, '');
@@ -21,7 +21,7 @@ export function normalizeSupabaseUrl(rawUrl?: string): string {
 
 export function getSupabaseAnonKey(rawKey?: string): string {
   const key = (rawKey || '').trim().replace(/^["']|["']$/g, '');
-  return key || 'sb_publishable_GFFo7rCM0Vv8DZYCVla2mw_DsJQ1Z4A';
+  return key || 'sb_publishable_80bsv6tafkSchBHENJITSRQ_1E0A7_placeholder';
 }
 
 let _client: SupabaseClient | null = null;
