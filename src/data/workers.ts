@@ -26,39 +26,8 @@ export interface Worker {
   tamTruStatus?: 'registered' | 'unregistered';
 }
 
-// 💥 DÁN DANH SÁCH CÔNG NHÂN THỰC TẾ CỦA BẠN VÀO MẢNG NÀY 💥
-export const WORKERS: Worker[] = [
-  {
-    id: 'w-001',
-    stt: 1,
-    hoVaTen: 'Nguyễn Văn A',
-    maNV: 'NV001',
-    tieuDoan: '1',
-    ktx: 'KTX 1',
-    day: 'Dãy 1',
-    phongSo: '101',
-    donVi: 'XD',
-    gioiTinh: 'Nam',
-    soDienThoai: '0901234567',
-    cccd: '079123456789',
-    tamTruStatus: 'registered',
-  },
-  {
-    id: 'w-002',
-    stt: 2,
-    hoVaTen: 'Trần Thị B',
-    maNV: 'NV002',
-    tieuDoan: '1',
-    ktx: 'KTX 1',
-    day: 'Dãy 1',
-    phongSo: '101',
-    donVi: 'ME',
-    gioiTinh: 'Nữ',
-    soDienThoai: '0912345678',
-    cccd: '079987654321',
-    tamTruStatus: 'unregistered',
-  },
-];
+// Mock data removed — data is loaded strictly from Supabase
+export const WORKERS: Worker[] = [];
 
 export const ROOM_CAPACITY = 20;
 export const BUILDINGS = ['Dãy 1', 'Dãy 2', 'Dãy 3', 'Dãy 4'];
@@ -104,11 +73,6 @@ export interface KtxOccupancy {
   fillRate: number;
 }
 
-/**
- * Builds per-KTX occupancy stats from whatever KTX names exist in the data,
- * so newly added dormitories (KTX 3, 4, 5, ...) appear without code changes.
- * Capacity = number of distinct (Dãy, Phòng) pairs seen in that KTX × ROOM_CAPACITY.
- */
 export function aggregateKtxOccupancy(workers: Worker[], roomCapacity: number = ROOM_CAPACITY): KtxOccupancy[] {
   const buckets = new Map<string, { rooms: Set<string>; occupied: number }>();
 

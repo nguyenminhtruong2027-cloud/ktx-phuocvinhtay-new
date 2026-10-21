@@ -1,41 +1,39 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { Worker, WORKERS } from '@/data/workers';
+import { Worker } from '@/data/workers';
 import { createClient } from '@/lib/supabase/client';
-
-// ─── DB row ↔ Worker mapping ───────────────────────────────────────────────
+import { toast } from 'sonner';
 
 function dbRowToWorker(row: Record<string, unknown>): Worker {
   return {
     id: String(row.id ?? ''),
     stt: Number(row.stt ?? 0),
-    hoVaTen: String(row.ho_va_ten ?? ''),
-    maNV: String(row.ma_nv ?? ''),
-    tieuDoan: String(row.tieu_doan ?? ''),
+    hoVaTen: String(row.full_name ?? row.ho_va_ten ?? ''),
+    maNV: String(row.worker_code ?? row.ma_nv ?? ''),
+    tieuDoan: String(row.battalion ?? row.tieu_doan ?? ''),
     ktx: String(row.ktx ?? ''),
-    donVi: String(row.don_vi ?? ''),
-    gioiTinh: String(row.gioi_tinh ?? ''),
-    ngaySinh: String(row.ngay_sinh ?? row.date_of_birth ?? row.dob ?? ''),
-    soDienThoai: String(row.so_dien_thoai ?? ''),
-    day: String(row.day ?? ''),
+    donVi: String(row.company ?? row.unit ?? row.don_vi ?? ''),
+    gioiTinh: String(row.gender ?? row.gioi_tinh ?? ''),
+    ngaySinh: String(row.birth_date ?? row.ngay_sinh ?? row.date_of_birth ?? row.dob ?? ''),
+    soDienThoai: String(row.phone ?? row.so_dien_thoai ?? ''),
+    day: String(row.ktx_block_id ?? row.day ?? ''),
     phongSo: String(row.phong_so ?? ''),
-    giuong: String(row.giuong ?? ''),
-    cccd: String(row.cccd ?? ''),
-    hoKhauTinh: String(row.ho_khau_tinh ?? ''),
-    toTruong: String(row.to_truong ?? ''),
-    sdtToTruong: String(row.sdt_to_truong ?? ''),
-    ngayVaoKTX: String(row.ngay_vao_ktx ?? ''),
+    giuong: String(row.bed_id ?? row.giuong ?? ''),
+    cccd: String(row.id_card ?? row.cccd ?? ''),
+    hoKhauTinh: String(row.hometown ?? row.ho_khau_tinh ?? ''),
+    toTruong: String(row.team_leader ?? row.to_truong ?? ''),
+    sdtToTruong: String(row.team_leader_phone ?? row.sdt_to_truong ?? ''),
+    ngayVaoKTX: String(row.ktx_join_date ?? row.ngay_vao_ktx ?? ''),
     ngayRaKTX: row.ngay_ra_ktx ? String(row.ngay_ra_ktx) : undefined,
-    ghiChu: String(row.ghi_chu ?? ''),
+    ghiChu: String(row.notes ?? row.ghi_chu ?? ''),
     khoaTraCuu: String(row.khoa_tra_cuu ?? ''),
     avatar: row.avatar ? String(row.avatar) : undefined,
-    tamTruStatus: (row.tam_tru_status as 'registered' | 'unregistered') ?? 'unregistered',
+    tamTruStatus: (row.status ?? row.tam_tru_status ?? 'unregistered') as 'registered' | 'unregistered',
   };
 }
 
 function workerToDbRow(w: Worker): Record<string, unknown> {
-  return {
-    id: w.id,
+  const row: Record<string, unknown> = {
     stt: w.stt,
     ho_va_ten: w.hoVaTen,
     ma_nv: w.maNV,
@@ -55,22 +53,42 @@ function workerToDbRow(w: Worker): Record<string, unknown> {
     ngay_vao_ktx: w.ngayVaoKTX,
     ngay_ra_ktx: w.ngayRaKTX ?? null,
     ghi_chu: w.ghiChu,
-    khoa_tra_cuu: w.khoaTraCuu,
+    khoa_tra_cuu: w.khoaTraCuu || `${w.ktx}|${w.day}|${w.phongSo}`,
     avatar: w.avatar ?? '',
     tam_tru_status: w.tamTruStatus ?? 'unregistered',
-  };
-}
 
-// ─── Context types ─────────────────────────────────────────────────────────
+    worker_code: w.maNV,
+    full_name: w.hoVaTen,
+    id_card: w.cccd,
+    phone: w.soDienThoai,
+    company: w.donVi,
+    bed_id: w.giuong,
+    status: w.tamTruStatus ?? 'unregistered',
+    gender: w.gioiTinh,
+    unit: w.donVi,
+    battalion: w.tieuDoan,
+    birth_date: w.ngaySinh,
+    hometown: w.hoKhauTinh,
+    team_leader: w.toTruong,
+    team_leader_phone: w.sdtToTruong,
+    ktx_join_date: w.ngayVaoKTX,
+    notes: w.ghiChu,
+    ktx_block_id: w.day,
+  };
+
+  if (w.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(w.id)) {
+    row.id = w.id;
+  }
+
+  return row;
+}
 
 interface WorkerContextValue {
   workers: Worker[];
   workerCount: number;
-  /** Exact total count from DB (accurate even for 6000+ records) */
   totalWorkerCount: number;
   loading: boolean;
   refreshing: boolean;
-  // CRUD operations (async, write to Supabase)
   addWorker: (worker: Worker) => Promise<void>;
   updateWorker: (worker: Worker) => Promise<void>;
   deleteWorker: (id: string) => Promise<void>;
@@ -80,13 +98,11 @@ interface WorkerContextValue {
   updateTamTruStatus: (id: string, status: 'registered' | 'unregistered') => Promise<void>;
   bulkUpdateKtx: (ids: string[], ktxValue: string) => Promise<void>;
   refreshWorkers: () => Promise<void>;
-  // Legacy setter for compatibility
   setWorkers: React.Dispatch<React.SetStateAction<Worker[]>>;
 }
 
 const WorkerContext = createContext<WorkerContextValue | null>(null);
 
-/** Page size for range-based fetching to bypass Supabase 1000-row default limit */
 const FETCH_PAGE_SIZE = 1000;
 
 export function WorkerProvider({ children }: { children: React.ReactNode }) {
@@ -97,7 +113,6 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // ── Fetch exact count from DB (lightweight, no data transfer) ─────────────
   const fetchCount = useCallback(async () => {
     try {
       const { count, error } = await supabase
@@ -106,12 +121,9 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
       if (!error && count !== null) {
         setTotalWorkerCount(count);
       }
-    } catch (err) {
-      console.error('fetchCount error:', err);
-    }
-  }, []);
+    } catch {}
+  }, [supabase]);
 
-  // ── Fetch ALL workers using range pagination (bypasses 1000-row limit) ────
   const fetchWorkers = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
@@ -124,22 +136,16 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
         const { data, error } = await supabase
           .from('workers')
           .select('*')
-          .order('stt', { ascending: true })
+          .order('id', { ascending: true })
           .range(from, to);
 
         if (error) {
-          console.error('Supabase load error:', error.message);
-          if (!isRefresh && allRows.length === 0) {
-            setWorkers([]);
-            setTotalWorkerCount(0);
-          }
-          break;
+          throw new Error(error.message);
         }
 
         const batch = (data ?? []).map(dbRowToWorker);
         allRows.push(...batch);
 
-        // If we got fewer rows than the page size, we've reached the end
         if (batch.length < FETCH_PAGE_SIZE) {
           hasMore = false;
         } else {
@@ -147,10 +153,11 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      allRows.sort((a, b) => (a.stt ?? 0) - (b.stt ?? 0) || a.hoVaTen.localeCompare(b.hoVaTen));
       setWorkers(allRows);
       setTotalWorkerCount(allRows.length);
-    } catch (err) {
-      console.error('Load workers failed:', err);
+    } catch (err: any) {
+      console.error('Load workers from Supabase failed:', err?.message);
       if (!isRefresh) {
         setWorkers([]);
         setTotalWorkerCount(0);
@@ -159,18 +166,15 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
     }
-  }, [loading]);
+  }, [supabase]);
 
-  // ── Initial load ──────────────────────────────────────────────────────────
   useEffect(() => {
     fetchWorkers(false);
   }, [fetchWorkers]);
 
-  // ── Real-time subscription (workers + profiles) ───────────────────────────
   useEffect(() => {
-    // Workers realtime channel
     const workersChannel = supabase
-      .channel('workers_realtime_v2')
+      .channel('workers_realtime_supabase_only')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'workers' },
@@ -179,7 +183,7 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
             const newWorker = dbRowToWorker(payload.new as Record<string, unknown>);
             setWorkers(prev => {
               if (prev.some(w => w.id === newWorker.id)) return prev;
-              const next = [...prev, newWorker].sort((a, b) => a.stt - b.stt);
+              const next = [...prev, newWorker].sort((a, b) => (a.stt ?? 0) - (b.stt ?? 0) || a.hoVaTen.localeCompare(b.hoVaTen));
               setTotalWorkerCount(next.length);
               return next;
             });
@@ -196,69 +200,41 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
           }
         }
       )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('[Realtime] workers channel subscribed');
-        }
-      });
-
-    // Profiles realtime channel — triggers a full re-fetch when profiles change
-    const profilesChannel = supabase
-      .channel('profiles_realtime_v2')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'profiles' },
-        () => {
-          fetchWorkers(false);
-        }
-      )
       .subscribe();
 
     channelRef.current = workersChannel;
 
     return () => {
       supabase.removeChannel(workersChannel);
-      supabase.removeChannel(profilesChannel);
     };
-  }, [fetchWorkers]);
+  }, [fetchWorkers, supabase]);
 
-  // ── Manual refresh ────────────────────────────────────────────────────────
   const refreshWorkers = useCallback(async () => {
     await fetchWorkers(true);
     await fetchCount();
   }, [fetchWorkers, fetchCount]);
 
-  // ── CRUD operations ───────────────────────────────────────────────────────
-
   const addWorker = useCallback(async (worker: Worker) => {
-    const { error } = await supabase
-      .from('workers')
-      .insert(workerToDbRow(worker));
-    if (error) throw new Error(error.message);
-    // Optimistic update: add to local state immediately (don't wait for realtime)
-    setWorkers(prev => {
-      if (prev.some(w => w.id === worker.id)) return prev;
-      const next = [...prev, worker].sort((a, b) => a.stt - b.stt);
-      setTotalWorkerCount(next.length);
-      return next;
-    });
-    // Fallback re-fetch after short delay to ensure consistency
-    setTimeout(() => fetchWorkers(false), 1500);
-  }, [fetchWorkers]);
+    const dbRow = workerToDbRow(worker);
+    delete dbRow.id; // Let Supabase auto-generate UUID
+
+    const { error } = await supabase.from('workers').insert(dbRow);
+    if (error) {
+      throw new Error(error.message);
+    }
+    await fetchWorkers(true);
+  }, [fetchWorkers, supabase]);
 
   const updateWorker = useCallback(async (worker: Worker) => {
-    const { error } = await supabase
-      .from('workers')
-      .update(workerToDbRow(worker))
-      .eq('id', worker.id);
-    if (error) throw new Error(error.message);
-    // Optimistic update
-    setWorkers(prev => prev.map(w => w.id === worker.id ? worker : w));
-  }, []);
+    const dbRow = workerToDbRow(worker);
+    const { error } = await supabase.from('workers').update(dbRow).eq('id', worker.id);
+    if (error) {
+      throw new Error(error.message);
+    }
+    await fetchWorkers(true);
+  }, [fetchWorkers, supabase]);
 
   const deleteWorker = useCallback(async (id: string) => {
-    // Log deletion to worker_deletion_log BEFORE hard delete
-    // This persists the record even after the worker row is removed
     const workerToDelete = workers.find(w => w.id === id);
     if (workerToDelete) {
       await supabase
@@ -270,18 +246,18 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
           ktx: workerToDelete.ktx || null,
           day: workerToDelete.day || null,
           deleted_at: new Date().toISOString(),
-        });
+        })
+        .catch(() => {});
     }
-    const { error } = await supabase
-      .from('workers')
-      .delete()
-      .eq('id', id);
-    if (error) throw new Error(error.message);
-  }, [workers]);
+    const { error } = await supabase.from('workers').delete().eq('id', id);
+    if (error) {
+      throw new Error(error.message);
+    }
+    await fetchWorkers(true);
+  }, [workers, fetchWorkers, supabase]);
 
   const deleteWorkers = useCallback(async (ids: string[]) => {
     if (ids.length === 0) return;
-    // Log all deletions to worker_deletion_log BEFORE hard delete
     const now = new Date().toISOString();
     const logRows = ids.map(id => {
       const w = workers.find(wk => wk.id === id);
@@ -295,81 +271,66 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
       };
     });
     if (logRows.length > 0) {
-      await supabase.from('worker_deletion_log').insert(logRows);
+      await supabase.from('worker_deletion_log').insert(logRows).catch(() => {});
     }
-    const { error } = await supabase
-      .from('workers')
-      .delete()
-      .in('id', ids);
-    if (error) throw new Error(error.message);
-  }, [workers]);
+    const { error } = await supabase.from('workers').delete().in('id', ids);
+    if (error) {
+      throw new Error(error.message);
+    }
+    await fetchWorkers(true);
+  }, [workers, fetchWorkers, supabase]);
 
   const deleteAllWorkers = useCallback(async () => {
-    // Log all current workers to worker_deletion_log BEFORE hard delete
-    const now = new Date().toISOString();
-    if (workers.length > 0) {
-      const BATCH = 200;
-      for (let i = 0; i < workers.length; i += BATCH) {
-        const batch = workers.slice(i, i + BATCH).map(w => ({
-          worker_id: w.id,
-          ho_va_ten: w.hoVaTen || null,
-          ma_nv: w.maNV || null,
-          ktx: w.ktx || null,
-          day: w.day || null,
-          deleted_at: now,
-        }));
-        await supabase.from('worker_deletion_log').insert(batch);
-      }
+    const { error } = await supabase.from('workers').delete().neq('id', '___never___');
+    if (error) {
+      throw new Error(error.message);
     }
-    const { error } = await supabase
-      .from('workers')
-      .delete()
-      .neq('id', '___never___');
-    if (error) throw new Error(error.message);
     setWorkers([]);
     setTotalWorkerCount(0);
-  }, [workers]);
+  }, [supabase]);
 
   const importWorkers = useCallback(async (rows: Worker[]) => {
     if (rows.length === 0) return;
     const maxStt = workers.length > 0 ? Math.max(...workers.map(w => w.stt)) : 0;
     const rowsWithStt = rows.map((r, i) => ({ ...r, stt: maxStt + i + 1 }));
-    const dbRows = rowsWithStt.map(workerToDbRow);
+    
+    const dbRows = rowsWithStt.map(w => {
+      const row = workerToDbRow(w);
+      delete row.id;
+      return row;
+    });
 
-    const BATCH = 100;
+    const BATCH = 500;
     for (let i = 0; i < dbRows.length; i += BATCH) {
       const batch = dbRows.slice(i, i + BATCH);
-      const { error } = await supabase
-        .from('workers')
-        .upsert(batch, { onConflict: 'id' });
-      if (error) throw new Error(error.message);
+      const { error } = await supabase.from('workers').upsert(batch);
+      if (error) {
+        throw new Error(error.message);
+      }
     }
-    // After import, re-fetch to get accurate state from DB (refresh mode)
     await fetchWorkers(true);
-  }, [workers, fetchWorkers]);
+  }, [workers, fetchWorkers, supabase]);
 
   const updateTamTruStatus = useCallback(async (id: string, status: 'registered' | 'unregistered') => {
-    const { error } = await supabase
-      .from('workers')
-      .update({ tam_tru_status: status })
-      .eq('id', id);
-    if (error) throw new Error(error.message);
-  }, []);
+    const { error } = await supabase.from('workers').update({ status, tam_tru_status: status }).eq('id', id);
+    if (error) {
+      throw new Error(error.message);
+    }
+    setWorkers(prev => prev.map(w => w.id === id ? { ...w, tamTruStatus: status } : w));
+  }, [supabase]);
 
   const bulkUpdateKtx = useCallback(async (ids: string[], ktxValue: string) => {
     if (ids.length === 0) return;
     const BATCH = 200;
     for (let i = 0; i < ids.length; i += BATCH) {
       const batchIds = ids.slice(i, i + BATCH);
-      const { error } = await supabase
-        .from('workers')
-        .update({ ktx: ktxValue })
-        .in('id', batchIds);
-      if (error) throw new Error(error.message);
+      const { error } = await supabase.from('workers').update({ ktx: ktxValue }).in('id', batchIds);
+      if (error) {
+        throw new Error(error.message);
+      }
     }
-    // Optimistic update in local state
     setWorkers(prev => prev.map(w => ids.includes(w.id) ? { ...w, ktx: ktxValue } : w));
-  }, []);
+  }, [supabase]);
 
   return (
     <WorkerContext.Provider value={{
