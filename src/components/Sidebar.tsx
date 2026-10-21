@@ -148,7 +148,7 @@ export default function Sidebar() {
           {!collapsed && (
             <div className="min-w-0">
               <span className="font-extrabold text-sm text-white tracking-tight block leading-tight">KÝ TÚC XÁ</span>
-              <span className="text-[11px] text-gray-400 font-semibold tracking-wider">HÓC MÔN</span>
+              <span className="text-[11px] text-gray-400 font-semibold tracking-wider">PHƯỚC VĨNH TÂY</span>
             </div>
           )}
         </div>
@@ -253,7 +253,7 @@ export default function Sidebar() {
             </div>
             <div>
               <span className="font-extrabold text-xs sm:text-sm text-white tracking-tight block leading-tight">KÝ TÚC XÁ</span>
-              <span className="text-[10px] text-gray-400 font-semibold tracking-wider">HÓC MÔN</span>
+              <span className="text-[10px] text-gray-400 font-semibold tracking-wider">PHƯỚC VĨNH TÂY</span>
             </div>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default function Sidebar() {
                 </div>
                 <div>
                   <span className="font-extrabold text-sm text-white tracking-tight block leading-tight">KÝ TÚC XÁ</span>
-                  <span className="text-[11px] text-gray-400 font-semibold tracking-wider">HÓC MÔN</span>
+                  <span className="text-[11px] text-gray-400 font-semibold tracking-wider">PHƯỚC VĨNH TÂY</span>
                 </div>
               </div>
               <button

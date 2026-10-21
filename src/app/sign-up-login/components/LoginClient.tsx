@@ -12,7 +12,7 @@ interface LoginForm {
 
 export default function LoginClient() {
   const [isMounted, setIsMounted] = useState(false);
-  const [form, setForm] = useState<LoginForm>({ email: '', password: '' });
+  const [form, setForm] = useState<LoginForm>({ email: 'adminpvt@ktx.com', password: 'admin123' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,6 +22,36 @@ export default function LoginClient() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleQuickLoginAdmin = async () => {
+    setForm({ email: 'adminpvt@ktx.com', password: 'admin123' });
+    setLoading(true);
+    setError('');
+    try {
+      await signIn('adminpvt@ktx.com', 'admin123');
+      router.replace('/');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickLoginStaff = async () => {
+    setForm({ email: 'staffpvt@ktx.com', password: 'staff123' });
+    setLoading(true);
+    setError('');
+    try {
+      await signIn('staffpvt@ktx.com', 'staff123');
+      router.replace('/');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,11 +67,11 @@ export default function LoginClient() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
-        setError('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
+        setError('Email hoặc mật khẩu không đúng. Vui lòng thử lại với adminpvt@ktx.com / admin123.');
       } else if (msg.includes('Email not confirmed')) {
         setError('Email chưa được xác nhận. Vui lòng kiểm tra hộp thư.');
       } else {
-        setError(`Lỗi đăng nhập: ${msg}`);
+        setError(msg);
       }
     } finally {
       setLoading(false);
@@ -55,7 +85,7 @@ export default function LoginClient() {
         <div className="flex items-center gap-3" suppressHydrationWarning>
           <AppLogo size={40} />
           <div>
-            <p className="font-bold text-white text-base leading-tight">KÝ TÚC XÁ HÓC MÔN</p>
+            <p className="font-bold text-white text-base leading-tight">KÝ TÚC XÁ PHƯỚC VĨNH TÂY</p>
             <p className="text-white/60 text-xs">HỆ Thống Quản Lý</p>
           </div>
         </div>
@@ -85,7 +115,7 @@ export default function LoginClient() {
 
         <div className="flex items-center gap-2" suppressHydrationWarning>
           <Building2 size={14} className="text-white/40" />
-          <p className="text-white/40 text-xs">KÝ TÚC XÁ HÓC MÔN · Hệ Thống Quản Lý Nội Bộ</p>
+          <p className="text-white/40 text-xs">KÝ TÚC XÁ PHƯỚC VĨNH TÂY · Hệ Thống Quản Lý Nội Bộ</p>
         </div>
       </div>
 
@@ -96,7 +126,7 @@ export default function LoginClient() {
           <div className="flex flex-col items-center gap-2 mb-8 lg:hidden" suppressHydrationWarning>
             <AppLogo size={48} />
             <div className="text-center">
-              <p className="font-bold text-lg text-foreground">KÝ TÚC XÁ HÓC MÔN</p>
+              <p className="font-bold text-lg text-foreground">KÝ TÚC XÁ PHƯỚC VĨNH TÂY</p>
               <p className="text-sm text-muted-foreground">HỆ THỐNG QUẢN LÝ</p>
             </div>
           </div>
@@ -107,9 +137,56 @@ export default function LoginClient() {
               <ShieldCheck size={20} className="text-primary" />
               <span className="text-xs font-semibold text-primary uppercase tracking-widest">Đăng nhập bảo mật</span>
             </div>
-            <h2 className="text-2xl font-bold text-foreground">KÝ TÚC XÁ HÓC MÔN</h2>
+            <h2 className="text-2xl font-bold text-foreground">KÝ TÚC XÁ PHƯỚC VĨNH TÂY</h2>
             <p className="text-sm text-muted-foreground mt-1 font-medium">HỆ THỐNG QUẢN LÝ</p>
             <p className="text-xs text-muted-foreground mt-2">Vui lòng đăng nhập để tiếp tục</p>
+          </div>
+
+          {/* Quick Login Information & Buttons */}
+          <div className="mb-6 p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/80 dark:bg-blue-950/40 space-y-3 shadow-sm" suppressHydrationWarning>
+            <div className="flex items-center justify-between" suppressHydrationWarning>
+              <span className="text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-blue-600 dark:text-blue-400" />
+                Tài khoản dùng thử / Mặc định hệ thống:
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-blue-200 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-[10px] font-bold">
+                Có sẵn
+              </span>
+            </div>
+
+            <div className="text-xs text-blue-950 dark:text-blue-200 font-mono space-y-1.5 bg-white/80 dark:bg-black/30 p-2.5 rounded-lg border border-blue-200/80 dark:border-blue-900/50" suppressHydrationWarning>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground font-sans text-[11px]">Admin (Toàn quyền):</span>
+                <span className="font-bold text-rose-600 dark:text-rose-400 font-mono text-[11px]">adminpvt@ktx.com / admin123</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground font-sans text-[11px]">Staff (Chuyên viên):</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400 font-mono text-[11px]">staffpvt@ktx.com / staff123</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" suppressHydrationWarning>
+              <button
+                type="button"
+                onClick={handleQuickLoginAdmin}
+                disabled={loading}
+                className="w-full py-2.5 px-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-60"
+                suppressHydrationWarning
+              >
+                {loading ? <Loader2 size={13} className="animate-spin" /> : <ShieldCheck size={14} />}
+                <span>Vào với Admin</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleQuickLoginStaff}
+                disabled={loading}
+                className="w-full py-2.5 px-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-60"
+                suppressHydrationWarning
+              >
+                {loading ? <Loader2 size={13} className="animate-spin" /> : <LogIn size={14} />}
+                <span>Vào với Staff</span>
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
@@ -128,7 +205,7 @@ export default function LoginClient() {
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 className="input-field w-full"
-                placeholder="admin@ktx.com"
+                placeholder="adminpvt@ktx.com"
                 autoComplete="email"
                 disabled={loading}
                 suppressHydrationWarning

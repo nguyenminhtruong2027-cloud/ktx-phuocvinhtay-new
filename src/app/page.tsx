@@ -672,34 +672,91 @@ export default function OccupancyDashboardPage() {
 
   // ── Load block assignments & specialists from profiles ───────────────────
   useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from('profiles')
-      .select('id, full_name, email, role, assigned_blocks')
-      .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
-          const assignments: BlockAssignment[] = [];
-          const list = data.map((profile, idx) => {
-            const blocks: string[] = Array.isArray(profile.assigned_blocks) ? profile.assigned_blocks : [];
-            blocks.forEach(block => {
-              if (block && profile.full_name) {
-                assignments.push({ blockKey: block, staffName: profile.full_name });
-              }
-            });
-            return {
-              id: profile.id || `sp-${idx}`,
-              name: profile.full_name || profile.email?.split('@')[0] || `Chuyên viên ${idx + 1}`,
-              email: profile.email,
-              role: (profile.role === 'admin' ? 'admin' : 'staff') as 'admin' | 'staff',
-              assignedBlocks: blocks,
-            };
-          });
-          setBlockAssignments(assignments);
-          if (list.length > 0) {
-            setSpecialists(list);
-          }
+    const DEFAULT_STAFF_PROFILES = [
+      {
+        id: 'admin-pvt-master',
+        full_name: 'Quản Trị Viên Phước Vĩnh Tây',
+        email: 'adminpvt@ktx.com',
+        role: 'admin',
+        assigned_blocks: [],
+      },
+      {
+        id: 'staff-pvt-01',
+        full_name: 'Nguyễn Văn Hùng (Bảo Vệ / Quản Lý)',
+        email: 'staffpvt@ktx.com',
+        role: 'staff',
+        assigned_blocks: ['KTX 1 - Dãy 1', 'KTX 1 - Dãy 2', 'KTX 1 - Dãy 3'],
+      },
+      {
+        id: 'staff-pvt-02',
+        full_name: 'Trần Văn Toàn (Quản Lý Dãy)',
+        email: 'toantran@ktx.com',
+        role: 'staff',
+        assigned_blocks: ['KTX 2 - Dãy 1', 'KTX 2 - Dãy 2'],
+      },
+      {
+        id: 'staff-pvt-03',
+        full_name: 'Lê Thị Mai (Quản Lý Dãy)',
+        email: 'maile@ktx.com',
+        role: 'staff',
+        assigned_blocks: ['KTX 3 - Dãy 1', 'KTX 3 - Dãy 2'],
+      },
+    ];
+
+    const loadStaff = async () => {
+      let rawProfiles: any[] = [];
+      try {
+        const raw = typeof window !== 'undefined' ? localStorage.getItem('ktx_local_profiles') : null;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) rawProfiles = parsed;
         }
+      } catch {}
+
+      if (rawProfiles.length === 0) {
+        rawProfiles = DEFAULT_STAFF_PROFILES;
+      }
+
+      const supabase = createClient();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, role, assigned_blocks');
+
+        if (!error && data && data.length > 0) {
+          const map = new Map<string, any>();
+          rawProfiles.forEach(p => { if (p.email) map.set(p.email.toLowerCase(), p); });
+          data.forEach(p => { if (p.email) map.set(p.email.toLowerCase(), p); });
+          rawProfiles = Array.from(map.values());
+        }
+      } catch {}
+
+      const assignments: BlockAssignment[] = [];
+      const list = rawProfiles.map((profile, idx) => {
+        const blocks: string[] = Array.isArray(profile.assigned_blocks) ? profile.assigned_blocks : [];
+        blocks.forEach(block => {
+          if (block && profile.full_name) {
+            assignments.push({ blockKey: block, staffName: profile.full_name });
+          }
+        });
+        return {
+          id: profile.id || `sp-${idx}`,
+          name: profile.full_name || profile.name || profile.email?.split('@')[0] || `Chuyên viên ${idx + 1}`,
+          email: profile.email,
+          role: (profile.role === 'admin' ? 'admin' : 'staff') as 'admin' | 'staff',
+          assignedBlocks: blocks,
+        };
       });
+
+      setBlockAssignments(assignments);
+      setSpecialists(list);
+    };
+
+    loadStaff();
+    window.addEventListener('ktx_profiles_updated', loadStaff);
+    return () => {
+      window.removeEventListener('ktx_profiles_updated', loadStaff);
+    };
   }, []);
 
   // ── Load room → don_vi mapping ─────────────────────────────────────────────
@@ -871,7 +928,7 @@ export default function OccupancyDashboardPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight whitespace-nowrap">
-                    KÝ TÚC XÁ HÓC MÔN
+                    KÝ TÚC XÁ PHƯỚC VĨNH TÂY
                   </h1>
                   <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
                     <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 animate-pulse" />

@@ -635,7 +635,7 @@ function QRCodeDisplay({ url }: { url: string }) {
       {showPrintView && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center p-8 print:block text-black" id="print-area">
           <div className="text-center space-y-4 max-w-sm mx-auto">
-            <h2 className="text-xl font-bold uppercase tracking-wider">Đăng Ký Cư Trú KTX Hóc Môn</h2>
+            <h2 className="text-xl font-bold uppercase tracking-wider">Đăng Ký Cư Trú KTX Phước Vĩnh Tây</h2>
             <p className="text-xs text-gray-600">Quét mã QR dưới đây để điền thông tin</p>
             <img src={qrLargeUrl} alt="QR Code" className="w-56 h-56 mx-auto border-2 border-black p-2" />
             <p className="text-xs font-mono break-all">{url}</p>

@@ -95,7 +95,7 @@ export default function CheckoutPortalClient() {
         >
           <div className="text-center space-y-4 max-w-sm mx-auto">
             <h2 className="text-xl font-bold uppercase tracking-wider">
-              THỦ TỤC TRẢ PHÒNG KTX HÓC MÔN
+              THỦ TỤC TRẢ PHÒNG KTX PHƯỚC VĨNH TÂY
             </h2>
             <p className="text-xs text-gray-600">
               Quét mã QR bằng Camera điện thoại hoặc Zalo để khai báo dọn ra và bàn giao phòng

@@ -554,7 +554,7 @@ export default function FacilitiesClient() {
       'Ghi chú': '',
     });
     const filterLabel = activeKtx ? `_${activeKtx.replace(' ', '')}` : '';
-    const fileName = `CSVC_KTX_HocMon${filterLabel}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const fileName = `CSVC_KTX_PhuocVinhTay${filterLabel}_${new Date().toISOString().slice(0, 10)}.xlsx`;
     exportToExcel(exportData, fileName, 'Cơ sở vật chất');
   };
 

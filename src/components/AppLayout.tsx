@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import { useAuth } from '@/context/AuthContext';
 
-const PUBLIC_PATHS = ['/sign-up-login', '/register', '/checkout', '/attendance'];
+const PUBLIC_PATHS = ['/sign-up-login', '/login', '/register', '/checkout', '/attendance'];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, loading } = useAuth();

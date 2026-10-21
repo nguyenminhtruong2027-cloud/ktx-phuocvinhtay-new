@@ -1,8 +1,48 @@
--- Migration: Create workers table for KTX Manager
--- Timestamp: 20260912150000
--- IMPORTANT: Run this SQL in your Supabase Dashboard > SQL Editor to create the workers table.
+-- ============================================================
+-- PHƯỚC VĨNH TÂY MASTER DATABASE SCHEMA & ADMIN SEED
+-- Dự án: Ký Túc Xá Phước Vĩnh Tây
+-- Tài khoản Quản trị mặc định: adminpvt@ktx.com / Mật khẩu: admin123
+-- ============================================================
 
--- Create workers table
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Tạo sẵn tài khoản Admin Phước Vĩnh Tây trong Supabase Auth (mật khẩu: admin123)
+DO $$
+DECLARE
+  new_admin_id UUID := gen_random_uuid();
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'adminpvt@ktx.com') THEN
+    INSERT INTO auth.users (
+      id,
+      instance_id,
+      aud,
+      role,
+      email,
+      encrypted_password,
+      email_confirmed_at,
+      raw_app_meta_data,
+      raw_user_meta_data,
+      created_at,
+      updated_at
+    ) VALUES (
+      new_admin_id,
+      '00000000-0000-0000-0000-000000000000',
+      'authenticated',
+      'authenticated',
+      'adminpvt@ktx.com',
+      crypt('admin123', gen_salt('bf')),
+      NOW(),
+      '{"provider": "email", "providers": ["email"], "role": "admin"}',
+      '{"full_name": "Quản Trị Viên Phước Vĩnh Tây", "role": "admin"}',
+      NOW(),
+      NOW()
+    );
+  END IF;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Bỏ qua tạo auth.users: %', SQLERRM;
+END $$;
+
+-- 1. Create workers table
 CREATE TABLE IF NOT EXISTS public.workers (
   id TEXT PRIMARY KEY,
   stt INTEGER DEFAULT 0,

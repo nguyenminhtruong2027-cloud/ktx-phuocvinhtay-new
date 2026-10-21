@@ -1327,7 +1327,7 @@ export function WorkerManagementClient() {
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-                  KÝ TÚC XÁ HÓC MÔN
+                  KÝ TÚC XÁ PHƯỚC VĨNH TÂY
                 </h1>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30">
                   <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />

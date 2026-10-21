@@ -130,8 +130,8 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
         if (error) {
           console.error('Supabase load error:', error.message);
           if (!isRefresh && allRows.length === 0) {
-            setWorkers(WORKERS);
-            setTotalWorkerCount(WORKERS.length);
+            setWorkers([]);
+            setTotalWorkerCount(0);
           }
           break;
         }
@@ -147,15 +147,13 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      if (allRows.length > 0 || !loading) {
-        setWorkers(allRows);
-        setTotalWorkerCount(allRows.length);
-      }
+      setWorkers(allRows);
+      setTotalWorkerCount(allRows.length);
     } catch (err) {
       console.error('Load workers failed:', err);
       if (!isRefresh) {
-        setWorkers(WORKERS);
-        setTotalWorkerCount(WORKERS.length);
+        setWorkers([]);
+        setTotalWorkerCount(0);
       }
     } finally {
       if (isRefresh) setRefreshing(false);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { compareKtxNames } from '@/data/workers';
+import { compareKtxNames, WORKERS } from '@/data/workers';
 
 export interface KtxBlockGroup {
   ktx: string;
@@ -175,7 +175,8 @@ export async function fetchDynamicKtxStructure(forceRefresh = false): Promise<Kt
         });
       }
 
-      // If database contains no rows, return empty list
+      // Strictly dynamic: no static fallback if database has no entries
+
       if (ktxMap.size === 0) {
         _cachedKtxStructure = [];
         return [];

@@ -21,8 +21,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'KTXManager — Quản Lý Ký Túc Xá Công Nhân',
-  description: 'Hệ thống quản lý ký túc xá nội bộ cho công nhân xây dựng — theo dõi phòng, công nhân và tổ trưởng tại KTX 2.',
+  title: 'KTX Phước Vĩnh Tây — Quản Lý Ký Túc Xá Công Nhân',
+  description: 'Hệ thống quản lý ký túc xá nội bộ cho công nhân xây dựng — theo dõi phòng, công nhân và tổ trưởng tại KTX Phước Vĩnh Tây.',
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
   },
