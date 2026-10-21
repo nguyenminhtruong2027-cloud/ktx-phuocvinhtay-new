@@ -300,12 +300,16 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
       return row;
     });
 
-    const BATCH = 500;
+    const BATCH = 200;
     for (let i = 0; i < dbRows.length; i += BATCH) {
       const batch = dbRows.slice(i, i + BATCH);
-      const { error } = await supabase.from('workers').upsert(batch);
+      let { error } = await supabase.from('workers').upsert(batch);
       if (error) {
-        throw new Error(error.message);
+        const res = await supabase.from('workers').insert(batch);
+        error = res.error;
+      }
+      if (error) {
+        throw new Error(`Lỗi nhập dữ liệu (dòng ${i} đến ${i + batch.length}): ${error.message}`);
       }
     }
     await fetchWorkers(true);
